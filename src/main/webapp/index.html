@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="utf-8" http-equiv="encoding" />
+<title>Rest + JSON</title>
+<script type="text/javascript" src="includes/jquery-2.2.3.js"></script>
+</head>
+<body>
+<h1>Stocks App</h1>
+<p class="title">Stocks List</p>
+<div id="all-stocks-list" class="xx">
+</div>
+<hr/>
+
+<form id="get-stock" action="javascript:alert('submit')">
+<p class="title">Find Stock
+<input id="get-stock-symbol" type="text"/>
+<input class="button" type="submit" value="Find"/>
+</p>
+</form>
+
+<div class="result">
+<table>
+	<tr>
+		<td>Symbol:</td>
+		<td id="symbol"></td>
+	</tr>
+	<tr>
+		<td>Price:</td>
+		<td id="price"></td>
+	</tr>
+	<tr>
+		<td>Currency:</td>
+		<td id="currency"></td>
+	</tr>
+	<tr>
+		<td>Country:</td>
+		<td id="country"></td>
+	</tr>
+</table>
+</div>
+
+
+
+<hr/>
+<p class="title">Add new Stock</p>
+<div id="add-stock-flash-message" class="flash-message">
+</div>
+<form id="add-stock" action="javascript:alert('submit')">
+<fieldset>
+<table>
+<tr>
+<td><label for="add-stock-symbol">Symbol</label>
+<td><input id="add-stock-symbol" name="symbol" type="text"/>
+</tr>
+<tr>
+<td><label for="add-stock-currency">Currency</label>
+<td><input id="add-stock-currency" name="currency" type="text"/>
+</tr>
+<tr>
+<td><label for="add-stock-price">Price</label>
+<td><input id="add-stock-price" name="price" type="text"/>
+</tr>
+<tr>
+<td><label for="add-stock-country">Country</label>
+<td><input id="add-stock-country" name="country" type="text"/>
+</tr>
+<tr>
+<td><input class="button" type="submit" value="Add"/>
+</tr>
+</table>
+</fieldset>
+</form>
+
+<script>
+function loadAllStocks(){
+	$.getJSON("resources/stock/all", 
+		function (data, textStatus, jqXHR) {
+			all = "<table><tr><th>SYMBOL</th><th>PRICE</th><th>CURRENCY</th><th>COUNTRY</th></tr>"
+			$.each(data, function(i, item) {
+				all = all+"<tr><td>"+item.symbol+"</td><td>"+item.price+"</td><td>"+item.currency+"</td><td>"+item.country+"</td></tr>";
+			  });
+			$("#all-stocks-list").html(all+"</table>");
+});
+}
+//Load all stocks
+loadAllStocks();
+
+//$('.result').hide();
+$("#add-stock-flash-message").hide();
+
+$("#get-stock").submit(function() {
+	/*
+}
+	$.ajax({
+	    url: "resources/stock/" + $("#get-stock-symbol").val(),
+	    dataType: "json",
+	    type: 'GET',
+	    xhrFields: {
+	        withCredentials: true
+	    },
+	    success: function( data ) {
+	      alert( "SUCCESS:  " + data );
+	      	$("#symbol").html(data.symbol);
+			$("#price").html(data.price);
+			$("#currency").html(data.currency);
+			$("#country").html(data.country);
+	    },
+	    error: function( data ) {
+	      alert( "ERROR:  " + data );
+	    }
+	  });
+	*/
+	//using getJSON()
+	$.getJSON("resources/stock/" + $("#get-stock-symbol").val(), function(data, textStatus, jqXHR) {
+		//$('.result').fadeOut(500, function(){
+			//console.log( "symbol:"+data.symbol.val());
+			$("#symbol").html(data.symbol);
+			$("#price").html(data.price);
+			$("#currency").html(data.currency);
+			$("#country").html(data.country);
+			//$('.result').fadeIn(500)
+		})
+		//.done(function () { alert('Request done!'); })
+        .fail(function (jqxhr,settings,ex) { alert('failed GET, '+ ex); });
+	//});
+	
+	return false;
+});
+
+$("#add-stock").submit(function() {
+$.ajax({
+	type: "POST",
+	url: "resources/stock",
+	data: $("#add-stock").serialize(),
+	success: function() {
+		$("#add-stock-flash-message").show().html("Stock was added").fadeOut(5000);
+		loadAllStocks();
+	},
+	error: function(request, textStatus, errorThrown) {
+		if (textStatus == "error") {
+			$("#add-stock-flash-message")
+			.show().html(request.responseText).fadeOut(5000);
+		}
+		else {
+			$("#add-stock-flash-message")
+			.show().html("Server error").fadeOut(5000);
+		}
+	}
+});
+return false;
+});
+</script>
+</body>
+</html>
